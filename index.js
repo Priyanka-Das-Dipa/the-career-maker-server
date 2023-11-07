@@ -31,10 +31,11 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const serviceCollection = client.db('careerMaker').collection('services');
+    const bookingCollection = client.db('careerMaker').collection('bookings');
     app.get('/services', async(req, res) =>{
         const cursor = serviceCollection.find();
-        const result = await cursor.toArray()
-        res.send(result)
+        const result = await cursor.toArray();
+        res.send(result);
     })
 
     app.post('/services', async(req, res)=>{
@@ -50,7 +51,17 @@ async function run() {
       const result = await serviceCollection.findOne(query)
       res.send(result)
     })
-
+    app.get('/bookings', async(req, res)=>{
+      const cursor = bookingCollection.find();
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+    app.post('/bookings', async(req, res)=>{
+      const newBooking = req.body;
+      console.log(newBooking);
+      const result = await bookingCollection.insertOne(newBooking)
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
