@@ -40,7 +40,8 @@ const logger = (req, res, next) => {
 };
 
 const verifyToken = (req, res, next) => {
-  const token = req?.cookie?.token;
+  // const token = req?.cookie?.token;
+  const token = req.cookies?.token;
   console.log("token from middleware", token);
   if (!token) {
     return res.status(401).send({ message: "unauthorized access" });
@@ -110,9 +111,9 @@ async function run() {
       console.log(req.query.email);
       console.log("cookie", req.cookies);
       console.log("token user ingo", req.user);
-      if(req.user.email !== req.query.email){
-        return res.status(403).send({message: 'forbidden access'})
-      }
+      // if(req.user.email !== req.query.email){
+      //   return res.status(403).send({message: 'forbidden access'})
+      // }
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
@@ -121,6 +122,8 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+
     app.post("/bookings", async (req, res) => {
       const newBooking = req.body;
       console.log(newBooking);
