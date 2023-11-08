@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://the-career-maker.web.app", "https://the-career-maker.firebaseapp.com"],
     credentials: true,
   })
 );
@@ -32,6 +32,20 @@ const client = new MongoClient(uri, {
   },
 });
 
+
+
+const dbConnection = async () =>{
+  try{
+    client.connect()
+    console.log('DB connection successfully')
+  }
+  catch(error){
+    console.log(error.name, error.message)
+  }
+}
+dbConnection()
+
+
 // middlewares
 
 const logger = (req, res, next) => {
@@ -39,7 +53,7 @@ const logger = (req, res, next) => {
   next();
 };
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   // const token = req?.cookie?.token;
   const token = req.cookies?.token;
   console.log("token from middleware", token);
@@ -59,7 +73,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const serviceCollection = client.db("careerMaker").collection("services");
     const bookingCollection = client.db("careerMaker").collection("bookings");
 
