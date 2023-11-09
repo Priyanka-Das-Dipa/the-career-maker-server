@@ -150,7 +150,7 @@ async function run() {
         service,
         options
       );
-      res.send(res);
+      res.send(result);
     });
 
     // booking related api
