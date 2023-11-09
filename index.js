@@ -9,7 +9,11 @@ const port = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://the-career-maker.web.app", "https://the-career-maker.firebaseapp.com"],
+    origin: [
+      "http://localhost:5173",
+      "https://the-career-maker.web.app",
+      "https://the-career-maker.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -32,19 +36,15 @@ const client = new MongoClient(uri, {
   },
 });
 
-
-
-const dbConnection = async () =>{
-  try{
-    client.connect()
-    console.log('DB connection successfully')
+const dbConnection = async () => {
+  try {
+    client.connect();
+    console.log("DB connection successfully");
+  } catch (error) {
+    console.log(error.name, error.message);
   }
-  catch(error){
-    console.log(error.name, error.message)
-  }
-}
-dbConnection()
-
+};
+dbConnection();
 
 // middlewares
 
@@ -67,7 +67,6 @@ const verifyToken = async (req, res, next) => {
     req.user = decoded;
     next();
   });
-  
 };
 
 async function run() {
@@ -88,7 +87,8 @@ async function run() {
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
         .send({ success: true });
     });
@@ -106,6 +106,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/services/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await serviceCollection.deleteOne(query);
+      res.send(result);
+    });
+
     app.post("/services", async (req, res) => {
       const newService = req.body;
       console.log(newService);
@@ -118,6 +125,32 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await serviceCollection.findOne(query);
       res.send(result);
+    });
+
+    app.put("/services/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedService = req.body;
+      const service = {
+        $set: {
+          name: updatedService.name,
+          serviceImage: updatedService.serviceImage,
+          category: updatedService.category,
+          serviceName: updatedService.serviceName,
+          description: updatedService.description,
+          location: updatedService.location,
+          area: updatedService.area,
+          price: updatedService.price,
+          image: updatedService.image,
+        },
+      };
+      const result = await serviceCollection.updateOne(
+        filter,
+        service,
+        options
+      );
+      res.send(res);
     });
 
     // booking related api
@@ -136,7 +169,6 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-
 
     app.post("/bookings", async (req, res) => {
       const newBooking = req.body;
